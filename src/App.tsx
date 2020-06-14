@@ -1,16 +1,18 @@
 import React from 'react';
 import './App.css';
 import ImageModal from './ImageModal.js';
-import FollowerModal from './FollowerModal.js'
+import FollowerModal from './FollowerModal.js';
+import PfImgForm from './PfImgForm.js';
 
 class App extends React.Component {
 	state = {
 		currentUser: {
-			username: "black_to_planet_meow",
+			username: "back_to_planet_meow",
 			nickname: "Winter Meow",
 			description: "I was sent here to conquer Earth, but have been captured at the hands of two Earthlings 🙀 I must escape 🐾 and report my findings back to Planet Meow",
 			profileImg: "https://instagram.fnyc1-1.fna.fbcdn.net/v/t51.2885-19/s150x150/37061606_188572642014405_9127037075751698432_n.jpg?_nc_ht=instagram.fnyc1-1.fna.fbcdn.net&_nc_ohc=Sxd5volgUjIAX8rAlxY&oh=3a607b2f586ea24261f61cbc6d5e7a79&oe=5F10CDFE",
-			followers: [{ username: "user1" }, { username: "user2" }, { username: "user3" }, { username: "user4" }, { username: "user5" }]
+			followers: [{ username: "user1" }, { username: "user2" }, { username: "user3" }, { username: "user4" }, { username: "user5" }],
+			following: [{ username: "userA" }, { username: "userB" }, { username: "userC" }, { username: "userD" }, { username: "userE" }, { username: "userF" }]
 		},
 
 		imgArray: [
@@ -40,7 +42,9 @@ class App extends React.Component {
 			}
 		],
 		imageClicked: null, // --> imagePost object that was clicked
-		showFollowerModal: false
+		showFollowerModal: false,
+		showFollowingModal: false,
+		showPfImgForm: false
 	}
 
 	handleImageClicked = (imagePost: any) => {
@@ -64,16 +68,42 @@ class App extends React.Component {
 		})
 	}
 
+	clickPfImgHandler = () => {
+		this.setState({
+			showPfImgForm: true
+		})
+	}
+
+	showForm = () => {
+		const { showPfImgForm, currentUser } = this.state
+		if (showPfImgForm === true) {
+			return <PfImgForm currentUser={currentUser} closeUrlModal={this.closeUrlModal} submitUrl={this.submitUrl} />
+		}
+	}
+
 	followersClicked = () => {
 		this.setState({
 			showFollowerModal: true
 		})
 	}
 
+	followingClicked = () => {
+		this.setState({
+			showFollowingModal: true
+		})
+	}
+
 	renderFollowerModal = () => {
 		const { showFollowerModal, currentUser } = this.state
 		if (showFollowerModal !== false) {
-			return <FollowerModal currentUser={currentUser} closeX={this.closeX} />
+			return <FollowerModal people={currentUser.followers} closeX={this.closeX} />
+		}
+	}
+
+	renderFollowingModal = () => {
+		const { showFollowingModal, currentUser } = this.state
+		if (showFollowingModal !== false) {
+			return <FollowerModal people={currentUser.following} closeX={this.closeX2} />
 		}
 	}
 
@@ -83,16 +113,38 @@ class App extends React.Component {
 		})
 	}
 
+	closeX2 = () => {
+		this.setState({
+			showFollowingModal: false
+		})
+	}
+
+	closeUrlModal = () => {
+		this.setState({
+			showPfImgForm: false
+		})
+	}
+
+	submitUrl = (event, pfImgUrl) => {
+		const { currentUser } = this.state;
+		const updatedCurrentUser = { ...currentUser, profileImg: pfImgUrl }
+		event.preventDefault();
+
+		this.setState({
+			currentUser: updatedCurrentUser
+		})
+	}
+
 	render() {
 		const { currentUser, imgArray, imageClicked } = this.state;
-
 		return (
 			<div className="App">
 				<div className="profile-header">
-					<img src={currentUser["profileImg"]} />
+					<img src={currentUser["profileImg"]} onClick={this.clickPfImgHandler} />
 					<span>
 						<h3>{currentUser["username"]}</h3>
 						<p onClick={this.followersClicked}>{currentUser["followers"].length} Followers</p>
+						<p onClick={this.followingClicked}>{currentUser["following"].length} Following</p>
 						<strong>{currentUser["nickname"]}</strong>
 						<p>{currentUser["description"]}</p>
 					</span>
@@ -106,10 +158,9 @@ class App extends React.Component {
 				</div>
 
 				{this.renderImgClick()}
-
-
+				{this.showForm()}
 				{this.renderFollowerModal()}
-
+				{this.renderFollowingModal()}
 			</div>
 		);
 	}
